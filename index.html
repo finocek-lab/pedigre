@@ -500,7 +500,9 @@
       : (CFG.gen[parentGen]?.pairGapDefault ?? null);
 
     if(typeof desiredGapPx==='number'){
-      const half = desiredGapPx/2;
+      // Scale the gap by the current zoom level to maintain consistent visual spacing
+      const scaledGap = desiredGapPx * Z.scale;
+      const half = scaledGap/2;
       const targetTop = parentC - half;
       const targetBot = parentC + half;
 
