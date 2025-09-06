@@ -499,6 +499,8 @@
       ? CFG.pairGapOverrides[parentId]
       : (CFG.gen[parentGen]?.pairGapDefault ?? null);
 
+    const scale = (typeof Z !== 'undefined' && Z && Number.isFinite(Z.scale) && Z.scale>0) ? Z.scale : 1;
+
     if(typeof desiredGapPx==='number'){
       const half = desiredGapPx/2;
       const targetTop = parentC - half;
@@ -506,14 +508,18 @@
 
       const deltaTop = targetTop - cTop;
       const deltaBot = targetBot - cBot;
+      // translate is inside a scaled container; compensate so on-screen movement equals desired px
+      const adjTop = (baseTop + (deltaTop / scale));
+      const adjBot = (baseBot + (deltaBot / scale));
 
-      topKid.style.transform = `translateY(${baseTop + Math.round(deltaTop)}px)`;
-      botKid.style.transform = `translateY(${baseBot + Math.round(deltaBot)}px)`;
+      topKid.style.transform = `translateY(${Math.round(adjTop)}px)`;
+      botKid.style.transform = `translateY(${Math.round(adjBot)}px)`;
     }else{
       const mid = (cTop + cBot)/2;
       const delta = (parentC - mid);
-      topKid.style.transform = `translateY(${baseTop + Math.round(delta)}px)`;
-      botKid.style.transform = `translateY(${baseBot + Math.round(delta)}px)`;
+      const adj = (delta / scale);
+      topKid.style.transform = `translateY(${Math.round(baseTop + adj)}px)`;
+      botKid.style.transform = `translateY(${Math.round(baseBot + adj)}px)`;
     }
   }
   function padSlideForTransforms(slide){
@@ -527,8 +533,10 @@
 
     const baseTop = 16 + (CFG.gen[Number(slide.id.replace('gen-',''))]?.padTop||0);
     const baseBot = 16 + (CFG.gen[Number(slide.id.replace('gen-',''))]?.padBottom||0);
-    slide.style.paddingTop    = `${baseTop + needTop}px`;
-    slide.style.paddingBottom = `${baseBot + needBot}px`;
+    const scale = (typeof Z !== 'undefined' && Z && Number.isFinite(Z.scale) && Z.scale>0) ? Z.scale : 1;
+    // needTop/Bot are in on-screen px; convert to local (pre-scale) px
+    slide.style.paddingTop    = `${baseTop + (needTop/scale)}px`;
+    slide.style.paddingBottom = `${baseBot + (needBot/scale)}px`;
   }
   function applyGenerationStylingFromCFG(){
     Object.entries(CFG.gen).forEach(([g, conf])=>{
