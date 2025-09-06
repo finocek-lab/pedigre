@@ -507,13 +507,16 @@
       const deltaTop = targetTop - cTop;
       const deltaBot = targetBot - cBot;
 
-      topKid.style.transform = `translateY(${baseTop + Math.round(deltaTop)}px)`;
-      botKid.style.transform = `translateY(${baseBot + Math.round(deltaBot)}px)`;
+      // kompenzuj skaliranje: translateY je u content prostoru, a delta je u ekranskim pikselima
+      const scale = Z.scale || 1;
+      topKid.style.transform = `translateY(${baseTop + Math.round(deltaTop / scale)}px)`;
+      botKid.style.transform = `translateY(${baseBot + Math.round(deltaBot / scale)}px)`;
     }else{
       const mid = (cTop + cBot)/2;
       const delta = (parentC - mid);
-      topKid.style.transform = `translateY(${baseTop + Math.round(delta)}px)`;
-      botKid.style.transform = `translateY(${baseBot + Math.round(delta)}px)`;
+      const scale = Z.scale || 1;
+      topKid.style.transform = `translateY(${baseTop + Math.round(delta / scale)}px)`;
+      botKid.style.transform = `translateY(${baseBot + Math.round(delta / scale)}px)`;
     }
   }
   function padSlideForTransforms(slide){
@@ -527,8 +530,10 @@
 
     const baseTop = 16 + (CFG.gen[Number(slide.id.replace('gen-',''))]?.padTop||0);
     const baseBot = 16 + (CFG.gen[Number(slide.id.replace('gen-',''))]?.padBottom||0);
-    slide.style.paddingTop    = `${baseTop + needTop}px`;
-    slide.style.paddingBottom = `${baseBot + needBot}px`;
+    // kompenzuj skaliranje: padding se primenjuje u content prostoru
+    const scale = Z.scale || 1;
+    slide.style.paddingTop    = `${baseTop + Math.round(needTop / scale)}px`;
+    slide.style.paddingBottom = `${baseBot + Math.round(needBot / scale)}px`;
   }
   function applyGenerationStylingFromCFG(){
     Object.entries(CFG.gen).forEach(([g, conf])=>{
